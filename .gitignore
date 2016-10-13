@@ -3,3 +3,5 @@
 ################################################################################
 
 /MDLinMVC/bin
+/MDLinMVC/App_Data/MDLinMVCContext-20161013132325_log.ldf
+/MDLinMVC/App_Data/MDLinMVCContext-20161013132325.mdf

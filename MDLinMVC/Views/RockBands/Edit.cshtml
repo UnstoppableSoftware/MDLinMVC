@@ -1,0 +1,50 @@
+﻿@model MDLinMVC.Models.RockBand
+
+@{
+    ViewBag.Title = "Edit";
+}
+
+<div class="mdl-color--white mdl-shadow--4dp mdl-color-text--grey-800 mdl-cell mdl-cell--10-col">
+
+<h2>Edit</h2>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+        <h4>RockBand</h4>
+        <hr />
+		
+        @Html.HiddenFor(model => model.Id)
+
+        <div class="mdl-grid">
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--12-col">
+					@Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "mdl-textfield__input" } })
+							@Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "mdl-textfield__label" })
+                @Html.ValidationMessageFor(model => model.Name, "", new { @style="visibility:visible", @class = "mdl-textfield__error" })
+            </div>
+		</div>
+
+        <div class="mdl-grid">
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--12-col">
+					@Html.EditorFor(model => model.OriginationDate, new { htmlAttributes = new { @class = "mdl-textfield__input" } })
+							@Html.LabelFor(model => model.OriginationDate, htmlAttributes: new { @class = "mdl-textfield__label" })
+                @Html.ValidationMessageFor(model => model.OriginationDate, "", new { @style="visibility:visible", @class = "mdl-textfield__error" })
+            </div>
+		</div>
+
+        <div class="mdl-grid">
+            <div class="mdl-cell mdl-cell--2-offset mdl-cell--10-col">
+				<input type="button" value="Cancel" onclick="location.href = '/';" class="mdl-button mdl-js-button mdl-button--raised"/>
+                <input type="submit" value="Save" class="mdl-button mdl-js-button mdl-button--raised" />
+            </div>
+        </div>
+}
+</div>
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

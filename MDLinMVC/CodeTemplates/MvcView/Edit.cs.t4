@@ -1,0 +1,210 @@
+﻿<#@ template language="C#" HostSpecific="True" #>
+<#@ output extension=".cshtml" #>
+<#@ include file="Imports.include.t4" #>
+@model <#= ViewDataTypeName #>
+<#
+string boolType = "System.Boolean";
+Version requiredMvcVersion = new Version("5.1.0.0");
+bool isControlHtmlAttributesSupported = MvcVersion >= requiredMvcVersion;
+// The following chained if-statement outputs the file header code and markup for a partial view, a view using a layout page, or a regular view.
+if(IsPartialView) {
+#>
+
+<#
+} else if(IsLayoutPageSelected) {
+#>
+
+@{
+    ViewBag.Title = "<#= ViewName#>";
+<#
+if (!String.IsNullOrEmpty(LayoutPageFile)) {
+#>
+    Layout = "<#= LayoutPageFile#>";
+<#
+}
+#>
+}
+
+<div class="mdl-color--white mdl-shadow--4dp mdl-color-text--grey-800 mdl-cell mdl-cell--10-col">
+
+<h2><#= ViewName#></h2>
+
+<#
+} else {
+#>
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title><#= ViewName #></title>
+</head>
+<body>
+<#
+    PushIndent("    ");
+}
+#>
+<#
+if (ReferenceScriptLibraries) {
+#>
+<#
+    if (!IsLayoutPageSelected && IsBundleConfigPresent) {
+#>
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/jqueryval")
+
+<#
+    }
+#>
+<#
+    else if (!IsLayoutPageSelected) {
+#>
+<script src="~/Scripts/jquery-<#= JQueryVersion #>.min.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+
+<#
+    }
+#>
+
+<#
+}
+#>
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+        <h4><#= ViewDataTypeShortName #></h4>
+        <hr />
+		
+<#
+foreach (PropertyMetadata property in ModelMetadata.Properties) {
+    if (property.Scaffold && !property.IsAssociation) {
+        if (property.IsPrimaryKey) {
+#>
+        @Html.HiddenFor(model => model.<#= property.PropertyName #>)
+
+<#
+        } else if (!property.IsReadOnly) {
+#>
+        <div class="mdl-grid">
+<#
+			bool isCheckbox = property.TypeName.Equals(boolType);
+            if (property.IsForeignKey) {
+#>
+			<div class="mdl-selectfield mdl-js-selectfield mdl-selectfield--floating-label mdl-cell  mdl-cell--12-col">
+<# 
+            if (isControlHtmlAttributesSupported) {
+#>
+                @Html.DropDownList("<#= property.PropertyName #>", null, htmlAttributes: new { @class = "mdl-selectfield__select" })
+				@Html.Label("<#= property.PropertyName #>", "Choose <#= property.PropertyName #>:", htmlAttributes: new { @class = "mdl-selectfield__label " })
+<#
+            } else {
+#>
+                @Html.DropDownList("<#= property.PropertyName #>", String.Empty)
+				@Html.Label("<#= property.PropertyName #>", "Choose <#= property.PropertyName #>:", String.Empty)
+<#
+            }
+        } else  if (isControlHtmlAttributesSupported) {
+            if (isCheckbox) {
+#>
+                <div class="mdl-cell  mdl-cell--10-col">
+				<label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="<#= property.PropertyName #>">
+					@Html.CheckBoxFor(model => model.<#= property.PropertyName #>, new { @class = "mdl-checkbox__input" })
+					<span class="mdl-checkbox__label"><#= property.PropertyName #>?</span>
+				</label>
+<#
+            } else if (property.IsEnum && !property.IsEnumFlags) {
+#>
+                @Html.EnumDropDownListFor(model => model.<#= property.PropertyName #>, htmlAttributes: new { @class = "" })
+<#
+            } else {
+#>
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--12-col">
+					@Html.EditorFor(model => model.<#= property.PropertyName #>, new { htmlAttributes = new { @class = "mdl-textfield__input" } })
+<#
+					if (property.IsForeignKey) {
+#>
+							@Html.LabelFor(model => model.<#= property.PropertyName #>, "<#= GetAssociationName(property) #>", htmlAttributes: new { @class = "mdl-textfield__label" })
+<#
+					} else {
+#>
+							@Html.LabelFor(model => model.<#= property.PropertyName #>, htmlAttributes: new { @class = "mdl-textfield__label" })
+<#
+					}
+#>
+<#
+			} 
+		} else {
+#>
+                @Html.EditorFor(model => model.<#= property.PropertyName #>)
+<#
+        }
+#>
+<# 
+        if (isControlHtmlAttributesSupported) {
+#>
+                @Html.ValidationMessageFor(model => model.<#= property.PropertyName #>, "", new { @style="visibility:visible", @class = "mdl-textfield__error" })
+<#        
+        } else {
+#>
+                @Html.ValidationMessageFor(model => model.<#= property.PropertyName #>)
+<#      
+        }
+#>
+            </div>
+		</div>
+
+<#
+	  }
+    }
+}
+#>
+        <div class="mdl-grid">
+            <div class="mdl-cell mdl-cell--2-offset mdl-cell--10-col">
+				<input type="button" value="Cancel" onclick="location.href = '/';" class="mdl-button mdl-js-button mdl-button--raised"/>
+                <input type="submit" value="Save" class="mdl-button mdl-js-button mdl-button--raised" />
+            </div>
+        </div>
+}
+</div>
+
+
+<#
+if(IsLayoutPageSelected && ReferenceScriptLibraries && IsBundleConfigPresent) {
+#>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+<#
+}
+#>
+<#
+else if(IsLayoutPageSelected && ReferenceScriptLibraries) {
+#>
+
+<script src="~/Scripts/jquery-<#= JQueryVersion #>.min.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+<#
+}
+#>
+<#
+// The following code closes the tag used in the case of a view using a layout page and the body and html tags in the case of a regular view page
+#>
+<#
+if(!IsPartialView && !IsLayoutPageSelected) {
+    ClearIndent();
+#>
+</body>
+</html>
+<#
+}
+#>
+<#@ include file="ModelMetadataFunctions.cs.include.t4" #>
